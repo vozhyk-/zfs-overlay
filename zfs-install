@@ -1,7 +1,7 @@
 #
 # Boot Linux Live CD with ZFS support
 # fearedbliss maintains a variant of System Rescue CD that is highly recommended:
-# http://ftp.osuosl.org/pub/funtoo/distfiles/sysresccd/
+# https://wiki.gentoo.org/wiki/User:Fearedbliss
 # Instruction for a USB key version
 # http://www.sysresccd.org/Sysresccd-manual-en_How_to_install_SystemRescueCd_on_an_USB-stick
 
@@ -78,8 +78,10 @@ echo "sys-fs/zfs-kmod ~amd64" >> /etc/portage/package.accept_keywords
 echo "sys-fs/zfs ~amd64" >> /etc/portage/package.accept_keywords
 emerge sys-fs/zfs
 
-# Add zfs to boot runlevel
-rc-update add zfs boot
+# Make zfs start on boot
+rc-update add zfs-import boot
+rc-update add zfs-mount boot
+rc-update add zfs-share default
 
 # Install gptfdisk
 emerge sys-apps/gptfdisk
@@ -91,7 +93,7 @@ sgdisk --new=2:48:2047 --typecode=2:EF02 --change-name=2:"BIOS boot partition" /
 echo 1 > /proc/sys/vm/drop_caches
 
 # Install GRUB2
-echo "sys-boot/grub:2 libzfs" >> /etc/portage/package.use
+echo "sys-boot/grub:2 libzfs" >> /etc/portage/package.use/main
 echo "sys-boot/grub:2 ~amd64" >> /etc/portage/package.accept_keywords
 emerge sys-boot/grub:2
 touch /etc/mtab
@@ -119,7 +121,7 @@ zfs snapshot rpool/ROOT/gentoo@install
 echo options zfs zfs_arc_max=536870912 >> /etc/modprobe.d/zfs.conf
 
 # Set portage niceness to minimize potential for updates to cause lag
-echo PORTAGE_NICENESS=19 >> /etc/make.conf
+echo PORTAGE_NICENESS=19 >> /etc/portage/make.conf
 
 # Set portage to compile in a CGROUP to minimize lag
 cat << END > /usr/local/sbin/portage-cgroup
